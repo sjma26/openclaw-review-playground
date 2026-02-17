@@ -6,7 +6,7 @@ contract Vulnerable2 {
     mapping(address => uint256) public balances;
 
     constructor() {
-        owner = tx.origin; // ❌ tx.origin auth bug
+        owner = tx.origin;
     }
 
     function deposit() public payable {
@@ -15,8 +15,6 @@ contract Vulnerable2 {
 
     function withdraw(uint256 amount) public {
         require(balances[msg.sender] >= amount, "Not enough");
-
-        // ❌ Reentrancy: external call before state update
         (bool ok,) = msg.sender.call{value: amount}("");
         require(ok, "Transfer failed");
 
@@ -24,7 +22,6 @@ contract Vulnerable2 {
     }
 
     function kill() public {
-        // ❌ No access control
         selfdestruct(payable(msg.sender));
     }
 }
